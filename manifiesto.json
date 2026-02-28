@@ -1,0 +1,23 @@
+{
+  "name": "ProGol Elite ©",
+  "short_name": "ProGol Elite",
+  "description": "Sistema Profesional de Quinielas",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/4f46e5/ffffff?text=PE",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512/4f46e5/ffffff?text=ProGol+Elite",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
