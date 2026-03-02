@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ProGol Elite ©</title>
+    <style>
+        :root { --p: #4f46e5; --s: #10b981; --bg: #0f172a; --c: #1e293b; --t: #f8fafc; --b: #334155; --d: #ef4444; --gold: #fcc419; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--t); overflow: hidden; height: 100vh; touch-action: manipulation; }
+        .app { height: 100vh; display: flex; flex-direction: column; }
+        
+        .login-screen { 
+            position: fixed; inset: 0; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 25px; text-align: center;
+        }
+        .login-logo { font-size: 70px; margin-bottom: 15px; filter: drop-shadow(0 0 20px rgba(79, 70, 229, 0.5)); }
+        .login-title { 
+            color: var(--gold); margin-bottom: 10px; font-size: 28px; font-weight: bold;
+            text-shadow: 0 2px 10px rgba(252, 196, 25, 0.3);
+        }
+        .login-subtitle { color: #94a3b8; margin-bottom: 20px; font-size: 14px; }
+        .copyright-box { 
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px; padding: 12px; margin-bottom: 20px; max-width: 320px;
+        }
+        .copyright-text { 
+            color: #fca5a5; font-size: 10px; line-height: 1.4; font-weight: 500;
+        }
+        .copyright-text strong { color: #ef4444; display: block; margin-bottom: 5px; font-size: 11px; }
+        .license-box {
+            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px; padding: 15px; margin-bottom: 20px; max-width: 320px;
+            width: 100%;
+        }
+        .license-title {
+            color: var(--s); font-size: 12px; font-weight: bold; margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .pass-input { 
+            padding: 14px; border-radius: 10px; border: 2px solid var(--b); 
+            background: rgba(15, 23, 42, 0.8); color: white; font-size: 16px; 
+            text-align: center; width: 100%; margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        .pass-input:focus { outline: none; border-color: var(--p); box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
+        .login-btn { 
+            padding: 14px; background: linear-gradient(90deg, var(--p), #6366f1); 
+            color: white; border: none; border-radius: 10px; font-size: 16px; 
+            font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+        .login-btn:active { transform: scale(0.95); }
+        .error-msg { 
+            color: var(--d); margin-top: 10px; font-weight: bold; display: none;
+            background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;
+            font-size: 12px;
+        }
+        .success-msg {
+            color: var(--s); margin-top: 10px; font-weight: bold; display: none;
+            background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px;
+            font-size: 12px;
+        }
+        .device-info { 
+            color: #64748b; font-size: 9px; margin-top: 15px; font-family: monospace;
+        }
+        
+        .blocked-screen {
+            position: fixed; inset: 0; background: #000; z-index: 99999;
+            display: none; flex-direction: column; align-items: center; 
+            justify-content: center; padding: 30px; text-align: center;
+        }
+        .blocked-icon { font-size: 80px; margin-bottom: 20px; }
+        .blocked-title { color: #ef4444; font-size: 22px; margin-bottom: 15px; font-weight: bold; }
+        .blocked-text { color: #fff; max-width: 300px; line-height: 1.6; font-size: 13px; }
+        .blocked-copyright { color: #64748b; font-size: 10px; margin-top: 30px; }
+        
+        .header { padding: 12px 15px; background: var(--p); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .header-brand { font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .copyright-badge { font-size: 10px; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 4px; }
+        .counters-bar { background: #000; display: flex; justify-content: space-around; padding: 10px; font-size: 12px; font-weight: bold; border-bottom: 1px solid var(--p); flex-shrink: 0; }
+        .c-val { color: var(--s); font-size: 14px; }
+
+        .viewer { height: 140px; background: #000; position: relative; overflow: hidden; border-bottom: 2px solid var(--p); flex-shrink: 0; transition: 0.3s; }
+        .viewer.collapsed { height: 0; border-bottom: none; }
+        #viewImg { position: absolute; width: 100%; top: 0; left: 0; transform-origin: 0 0; pointer-events: none; user-select: none; }
+        
+        .view-toggle { position: fixed; right: 15px; top: 160px; z-index: 95; background: var(--p); border: none; border-radius: 50%; width: 44px; height: 44px; color: white; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        .view-toggle.up { top: 55px; }
+        .view-toggle:active { transform: scale(0.9); }
+
+        .content { flex: 1; overflow-y: auto; padding: 12px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+        .scroll-buffer { padding-bottom: 150px; }
+        
+        .card { background: var(--c); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--b); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .match-row { display: grid; grid-template-columns: 30px 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .match-num { background: var(--p); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .t-input { 
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--b); background: #0f172a; color: #fff; 
+            font-size: 16px; font-weight: 600; text-transform: uppercase; transition: all 0.2s;
+        }
+        .t-input:focus { outline: none; border-color: var(--p); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        
+        .btn-group { display: flex; gap: 6px; }
+        .btn-opt { 
+            flex: 1; padding: 14px; border-radius: 10px; border: 1px solid var(--b); background: #2d3748; color: white; 
+            font-weight: bold; text-align: center; font-size: 16px; transition: all 0.15s; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-opt:active { transform: scale(0.95); }
+        .btn-opt.active { background: var(--p); border: 2px solid #fff; box-shadow: 0 0 15px rgba(79, 70, 229, 0.6); }
+        .btn-opt.hit { background: var(--s) !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+        
+        .summary-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid var(--p); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
+        .summary-item { background: #000; padding: 10px 2px; border-radius: 8px; border: 1px solid var(--b); }
+        .summary-pts { font-size: 10px; color: #94a3b8; display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .summary-count { font-size: 18px; font-weight: bold; color: var(--gold); }
+
+        .ticket-card { background: #111; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; position: relative; transition: transform 0.2s; }
+        .ticket-card:active { transform: scale(0.98); }
+        .ticket-card.best { border: 2px solid var(--gold); background: linear-gradient(135deg, #1a1a00, #0f0f00); box-shadow: 0 0 20px rgba(252, 196, 25, 0.4); }
+        .best-tag { position: absolute; top: -10px; right: 10px; background: var(--gold); color: #000; font-size: 10px; font-weight: bold; padding: 3px 10px; border-radius: 12px; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        
+        .res-grid-h { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; margin-top: 10px; }
+        .res-cell-h { background: #2d3748; padding: 8px 0; text-align: center; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
+        .res-cell-h.win { background: var(--s); color: white; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+
+        .btn-main { 
+            width: 100%; padding: 18px; background: var(--s); color: white; border: none; border-radius: 12px; 
+            font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+        .btn-main:disabled { opacity: 0.4; background: var(--b); box-shadow: none; cursor: not-allowed; }
+
+        .install-banner { 
+            background: linear-gradient(90deg, var(--p), #6366f1); padding: 15px; text-align: center; 
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200; transform: translateY(-100%); 
+            transition: transform 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .install-banner.show { transform: translateY(0); }
+        .install-btn { background: white; color: var(--p); border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-left: 10px; cursor: pointer; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); display: flex; height: 70px; border-top: 1px solid var(--b); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-btn { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 11px; gap: 4px; cursor: pointer; transition: all 0.2s; padding-bottom: 5px; }
+        .nav-btn.active { color: var(--p); font-weight: bold; }
+        .nav-btn:active { transform: scale(0.9); }
+        .nav-icon { font-size: 20px; }
+        
+        .hidden { display: none !important; }
+        
+        @media (display-mode: standalone) {
+            .header { padding-top: max(12px, env(safe-area-inset-top)); }
+        }
+        
+        .loading-overlay { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s;
+        }
+        .loading-overlay.hide { opacity: 0; pointer-events: none; }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--b); border-top-color: var(--p); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .footer-copyright {
+            text-align: center; padding: 20px; color: #64748b; font-size: 11px;
+            border-top: 1px solid var(--b); margin-top: 20px;
+        }
+        
+        .user-info {
+            background: rgba(79, 70, 229, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--gold);
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:active { transform: scale(0.95); }
+        .btn-secondary.danger { background: var(--d); }
+        .btn-secondary.danger:hover { background: #dc2626; }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            background: var(--p);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:active { transform: scale(0.95); }
+
+        .storage-status {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--s);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .storage-status.saved {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--s);
+        }
+
+        .storage-status.unsaved {
+            background: rgba(252, 196, 25, 0.1);
+            border-color: rgba(252, 196, 25, 0.3);
+            color: var(--gold);
+        }
+
+        .auto-save-indicator {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="blocked-screen" id="blockedScreen">
+    <div class="blocked-icon">🚫</div>
+    <div class="blocked-title">LICENCIA NO VÁLIDA</div>
+    <div class="blocked-text">
+        Este código de activación ya ha sido utilizado en otro dispositivo.<br><br>
+        Cada licencia es válida para un solo celular.<br><br>
+        <strong style="color: #ef4444;">Contacta al vendedor para adquirir una nueva licencia.</strong>
+    </div>
+    <div class="blocked-copyright">
+        © 2024 ProGol Elite. Todos los derechos reservados.
+    </div>
+</div>
+
+<div class="login-screen" id="loginScreen">
+    <div class="login-logo">⚽</div>
+    <div class="login-title">PROGOL ELITE</div>
+    <div class="login-subtitle">Sistema de Quinielas Profesional</div>
+    
+    <div class="copyright-box">
+        <div class="copyright-text">
+            <strong>⚠️ LICENCIA REQUERIDA</strong>
+            Esta es una aplicación de pago.<br>
+            © 2024 Todos los derechos reservados.<br>
+            Queda prohibida su reproducción o distribución sin autorización.
+        </div>
+    </div>
+    
+    <div class="license-box">
+        <div class="license-title">🔐 Activar Licencia</div>
+        <input type="text" id="codeInput" class="pass-input" placeholder="CÓDIGO (ej: PROGOL-0001-X7K9)" maxlength="20" style="text-transform: uppercase;">
+        <input type="text" id="nameInput" class="pass-input" placeholder="TU NOMBRE" maxlength="30" style="text-transform: uppercase;">
+        <button class="login-btn" onclick="app.activateLicense()">ACTIVAR</button>
+    </div>
+    
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+    
+    <div class="device-info" id="deviceInfo">ID: --</div>
+</div>
+
+<div class="app" id="mainApp" style="display: none;">
+    <div class="loading-overlay" id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; color: #94a3b8;">Cargando...</p>
+    </div>
+
+    <div class="install-banner" id="installBanner">
+        📲 ¿Instalar ProGol Elite?
+        <button class="install-btn" onclick="app.installPWA()">INSTALAR</button>
+        <button onclick="document.getElementById('installBanner').classList.remove('show')" style="background: none; border: none; color: white; margin-left: 10px; font-size: 18px;">✕</button>
+    </div>
+
+    <div class="header">
+        <div class="header-brand">
+            ⚽ PROGOL ELITE
+            <span class="copyright-badge">©</span>
+        </div>
+        <div style="text-align: right;">
+            <div id="stats" style="font-size: 12px; line-height: 1.4;">0 Pts<br>0 Vivos</div>
+            <div class="user-info" id="userDisplay" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="counters-bar">
+        <div>TRIPLES: <span id="countT" class="c-val">0</span></div>
+        <div>DOBLES: <span id="countD" class="c-val">0</span></div>
+        <div>SENCILLOS: <span id="countF" class="c-val">0</span></div>
+    </div>
+
+    <button class="view-toggle" id="toggleBtn" onclick="app.toggleViewer()">👁️</button>
+
+    <div class="viewer" id="imgViewer">
+        <button onclick="app.removeImg()" id="btnDel" style="position:absolute; right:10px; top:10px; background:var(--d); color:white; border:none; border-radius:50%; width:36px; height:36px; z-index:20; display:none; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">✕</button>
+        <div id="placeholder" style="text-align:center; padding-top:45px;">
+            <button onclick="document.getElementById('fileIn').click()" style="background:var(--p); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);">📸 CARGAR CARTELERA</button>
+            <input type="file" id="fileIn" accept="image/*" style="display:none;" capture="environment">
+        </div>
+        <img id="viewImg" src="" alt="Cartelera" draggable="false">
+    </div>
+
+    <div class="content" id="mainScroll">
+        <div id="tab1">
+            <div class="scroll-buffer">
+                <div class="storage-status saved" id="storageStatus">
+                    <span>💾 Datos guardados automáticamente</span>
+                    <span class="auto-save-indicator" id="lastSaved">Ahora</span>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-secondary" onclick="app.loadData()">
+                        📂 Cargar Guardados
+                    </button>
+                    <button class="btn-secondary danger" onclick="app.clearAllData()">
+                        🗑️ Limpiar Todo
+                    </button>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                    <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: bold;">IMPORTAR IMAGEN</div>
+                    <div class="image-actions">
+                        <button class="btn-small" onclick="document.getElementById('fileIn').click()">
+                            📁 Galería
+                        </button>
+                        <button class="btn-small" onclick="document.getElementById('fileIn').click()" style="background: #10b981;">
+                            📷 Cámara
+                        </button>
+                    </div>
+                    <input type="file" id="fileInImport" accept="image/*" style="display:none;">
+                </div>
+
+                <div class="card">
+                    <select id="redSel" class="t-input" style="font-size: 14px; cursor: pointer;" onchange="app.checkStatus(); app.saveDraft();">
+                        <option value="4T">4 Triples (9 boletos)</option>
+                        <option value="7D">7 Dobles (16 boletos)</option>
+                        <option value="3T3D">3 Triples + 3 Dobles (24 boletos)</option>
+                        <option value="2T6D">2 Triples + 6 Dobles (64 boletos)</option>
+                    </select>
+                </div>
+                <div id="matchesList"></div>
+                <button id="genBtn" class="btn-main" onclick="app.generate()" disabled>GENERAR QUINIELAS</button>
+                
+                <div class="footer-copyright">
+                    © 2024 ProGol Elite. Todos los derechos reservados.<br>
+                    Licencia válida para un solo dispositivo.
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab2" class="hidden"><div id="followList" class="scroll-buffer"></div></div>
+        
+        <div id="tab3" class="hidden">
+            <div id="summaryContainer"></div>
+            <div id="ticketContainer" class="scroll-buffer"></div>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-btn active" onclick="app.setTab(1)">
+            <span class="nav-icon">📝</span>
+            <span>JUGAR</span>
+        </button>
+        <button class="nav-btn" onclick="app.setTab(2)">
+            <span class="nav-icon">🎯</span>
+            <span>SEGUIR</span>
+        </button>
+        <button class="nav-btn" onclick="app.setTab(3)">
+            <span class="nav-icon">🎟️</span>
+            <span>BOLETOS</span>
+        </button>
+        <button class="nav-btn" onclick="app.reset()">
+            <span class="nav-icon">🔄</span>
+            <span>RESET</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+// CÓDIGOS DE LICENCIA VÁLIDOS
+const VALID_LICENSES = [
+    'PROGOL-0001-X7K9',
+    'PROGOL-0002-M3P8',
+    'PROGOL-0003-Q2R5',
+    'PROGOL-0004-T6V1',
+    'PROGOL-0005-W4Y9',
+    'PROGOL-0006-Z8A2',
+    'PROGOL-0007-B5C7',
+    'PROGOL-0008-D9E3',
+    'PROGOL-0009-F1G6',
+    'PROGOL-0010-H4J8',
+    'PROGOL-0011-K2L5',
+    'PROGOL-0012-N7M9',
+    'PROGOL-0013-P3Q6',
+    'PROGOL-0014-R8S1',
+    'PROGOL-0015-T4U7',
+    'PROGOL-0016-V9W2',
+    'PROGOL-0017-X5Y8',
+    'PROGOL-0018-Z1A4',
+    'PROGOL-0019-B6C9',
+    'PROGOL-0020-D2E7'
+];
+
+// SISTEMA DE LICENCIAS
+const LICENSE_SYSTEM = {
+    STORAGE_KEY: 'progol_license_data',
+    
+    init() {
+        const data = this.getLicenseData();
+        if (data && data.activated) {
+            const currentDevice = this.getDeviceId();
+            if (data.deviceId === currentDevice) {
+                return { valid: true, data: data };
+            } else {
+                return { valid: false, reason: 'device_mismatch' };
+            }
+        }
+        return { valid: false, reason: 'no_license' };
+    },
+    
+    getDeviceId() {
+        const fp = [
+            navigator.userAgent,
+            screen.width + 'x' + screen.height,
+            navigator.hardwareConcurrency || 'unknown',
+            navigator.platform,
+            new Date().getTimezoneOffset()
+        ].join('|');
+        return btoa(fp).substring(0, 20);
+    },
+    
+    activateLicense(code, userName) {
+        const normalizedCode = code.toUpperCase().trim();
+        
+        if (!VALID_LICENSES.includes(normalizedCode)) {
+            return { success: false, error: 'Código de licencia inválido' };
+        }
+        
+        const usedLicenses = JSON.parse(localStorage.getItem('progol_used_licenses') || '[]');
+        if (usedLicenses.includes(normalizedCode)) {
+            return { success: false, error: 'Este código ya fue utilizado en otro dispositivo' };
+        }
+        
+        const deviceId = this.getDeviceId();
+        const licenseData = {
+            code: normalizedCode,
+            userName: userName.toUpperCase().trim(),
+            deviceId: deviceId,
+            activated: true,
+            activationDate: new Date().toISOString()
+        };
+        
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(licenseData));
+        
+        usedLicenses.push(normalizedCode);
+        localStorage.setItem('progol_used_licenses', JSON.stringify(usedLicenses));
+        
+        return { success: true, data: licenseData };
+    },
+    
+    getLicenseData() {
+        const data = localStorage.getItem(this.STORAGE_KEY);
+        return data ? JSON.parse(data) : null;
+    },
+    
+    showBlocked() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('blockedScreen').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    },
+    
+    reset() {
+        localStorage.removeItem(this.STORAGE_KEY);
+        localStorage.removeItem('progol_used_licenses');
+        localStorage.removeItem('progol_draft');
+        localStorage.removeItem('progol_v13_final');
+        localStorage.removeItem('progol_image');
+    }
+};
+
+// APLICACIÓN PRINCIPAL
+const app = {
+    matches: Array.from({length: 14}, () => ({l:'', v:'', sel:[]})),
+    realResults: new Array(14).fill(null),
+    tickets: [],
+    imgPos: { x: 0, y: 0, scale: 1 }, 
+    isDragging: false, 
+    startPos: { x: 0, y: 0 },
+    deferredPrompt: null,
+    currentUser: null,
+    autoSaveTimer: null,
+    hasUnsavedChanges: false,
+    
+    matrices: {
+        "4T": [[0,0,0,0],[1,1,1,0],[2,2,2,0],[0,1,2,1],[1,2,0,1],[2,0,1,1],[0,2,1,2],[1,0,2,2],[2,1,0,2]],
+        "7D": [[0,0,0,0,0,0,0],[1,1,1,1,1,1,1],[0,0,0,1,1,1,1],[1,1,1,0,0,0,0],[0,1,1,0,0,1,1],[1,0,0,1,1,0,0],[0,1,1,1,1,0,0],[1,0,0,0,0,1,1],[0,0,1,0,1,0,1],[1,1,0,1,0,1,0],[0,0,1,1,0,1,0],[1,1,0,0,1,0,1],[0,1,0,0,1,1,0],[1,0,1,1,0,0,1],[0,1,0,1,0,0,1],[1,0,1,0,1,1,0]],
+        "3T3D": [[0,0,0,0,0,0],[1,1,1,0,0,0],[2,2,2,0,0,0],[0,1,2,1,1,1],[1,2,0,1,1,1],[2,0,1,1,1,1],[0,0,0,1,0,1],[1,1,1,1,0,1],[2,2,2,1,0,1],[0,1,2,0,1,0],[1,2,0,0,1,0],[2,0,1,0,1,0],[0,0,0,0,1,1],[1,1,1,0,1,1],[2,2,2,0,1,1],[0,1,2,1,0,0],[1,2,0,1,0,0],[2,0,1,1,0,0],[0,0,0,1,1,0],[1,1,1,1,1,0],[2,2,2,1,1,0],[0,1,2,0,0,1],[1,2,0,0,0,1],[2,0,1,0,0,1]],
+        "2T6D": []
+    },
+
+    init() {
+        const licenseCheck = LICENSE_SYSTEM.init();
+        
+        if (licenseCheck.valid) {
+            this.currentUser = licenseCheck.data;
+            this.showApp();
+        } else if (licenseCheck.reason === 'device_mismatch') {
+            LICENSE_SYSTEM.showBlocked();
+        } else {
+            document.getElementById('deviceInfo').textContent = 'ID: ' + LICENSE_SYSTEM.getDeviceId();
+        }
+    },
+
+    activateLicense() {
+        const codeInput = document.getElementById('codeInput');
+        const nameInput = document.getElementById('nameInput');
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        
+        const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
+        
+        if (!code) {
+            errorMsg.textContent = '❌ Ingresa el código de licencia';
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            return;
+        }
+        
+        if (!name) {
+            errorMsg.textContent = '❌ Ingresa tu nombre';
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            return;
+        }
+        
+        const result = LICENSE_SYSTEM.activateLicense(code, name);
+        
+        if (result.success) {
+            errorMsg.style.display = 'none';
+            successMsg.textContent = '✅ Licencia activada correctamente. Bienvenido ' + name.toUpperCase();
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                this.currentUser = result.data;
+                this.showApp();
+            }, 1500);
+        } else {
+            errorMsg.textContent = '❌ ' + result.error;
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+        }
+    },
+
+    showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+        
+        if (this.currentUser) {
+            const userDisplay = document.getElementById('userDisplay');
+            userDisplay.textContent = '👤 ' + this.currentUser.userName;
+            userDisplay.style.display = 'block';
+        }
+        
+        this.loadAppData();
+    },
+
+    loadAppData() {
+        // Generar matriz 2T6D
+        for(let i=0; i<64; i++){
+            let r = [
+                Math.floor(i/32)%2, Math.floor(i/16)%2, Math.floor(i/8)%2, 
+                Math.floor(i/4)%2, Math.floor(i/2)%2, i%2, 
+                Math.floor(i/21)%3, Math.floor(i/7)%3
+            ];
+            this.matrices["2T6D"].push(r);
+        }
+        
+        // Cargar datos guardados
+        this.loadAllData();
+        
+        this.renderMatches();
+        this.setupImageEvents();
+        this.setupPWA();
+        this.setupAutoSave();
+        
+        setTimeout(() => {
+            document.getElementById('loader').classList.add('hide');
+        }, 500);
+    },
+
+    setupPWA() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+            setTimeout(() => {
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    document.getElementById('installBanner').classList.add('show');
+                }
+            }, 2000);
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then((reg) => console.log('SW registrado'))
+                .catch((err) => console.log('Error SW:', err));
+        }
+    },
+
+    installPWA() {
+        if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            this.deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('App instalada');
+                }
+                this.deferredPrompt = null;
+                document.getElementById('installBanner').classList.remove('show');
+            });
+        }
+    },
+
+    // SISTEMA DE GUARDADO AUTOMÁTICO
+    setupAutoSave() {
+        // Guardar cada 30 segundos si hay cambios
+        setInterval(() => {
+            if (this.hasUnsavedChanges) {
+                this.saveAllData();
+            }
+        }, 30000);
+
+        // Guardar al salir de la página
+        window.addEventListener('beforeunload', () => {
+            this.saveAllData();
+        });
+
+        // Guardar al cambiar de visibilidad (cambiar de app)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.saveAllData();
+            }
+        });
+    },
+
+    markUnsaved() {
+        this.hasUnsavedChanges = true;
+        const statusEl = document.getElementById('storageStatus');
+        if (statusEl) {
+            statusEl.className = 'storage-status unsaved';
+            statusEl.innerHTML = '<span>⚠️ Cambios sin guardar</span><span class="auto-save-indicator">Guardando...</span>';
+        }
+        
+        // Auto-guardar después de 2 segundos de inactividad
+        clearTimeout(this.autoSaveTimer);
+        this.autoSaveTimer = setTimeout(() => {
+            this.saveAllData();
+        }, 2000);
+    },
+
+    saveAllData() {
+        const dataToSave = {
+            matches: this.matches,
+            realResults: this.realResults,
+            tickets: this.tickets,
+            reductionMode: document.getElementById('redSel').value,
+            lastSaved: new Date().toISOString()
+        };
+        
+        localStorage.setItem('progol_complete_data', JSON.stringify(dataToSave));
+        
+        this.hasUnsavedChanges = false;
+        this.updateStorageStatus();
+    },
+
+    loadAllData() {
+        const saved = localStorage.getItem('progol_complete_data');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                
+                if (data.matches) this.matches = data.matches;
+                if (data.realResults) this.realResults = data.realResults;
+                if (data.tickets) this.tickets = data.tickets;
+                if (data.reductionMode) {
+                    document.getElementById('redSel').value = data.reductionMode;
+                }
+                
+                // Cargar imagen si existe
+                const savedImage = localStorage.getItem('progol_image');
+                if (savedImage) {
+                    const img = document.getElementById('viewImg');
+                    img.src = savedImage;
+                    img.onload = () => {
+                        document.getElementById('placeholder').style.display = 'none';
+                        document.getElementById('btnDel').style.display = 'block';
+                    };
+                }
+                
+                this.updateStorageStatus();
+            } catch (e) {
+                console.error('Error cargando datos:', e);
+            }
+        }
+    },
+
+    updateStorageStatus() {
+        const statusEl = document.getElementById('storageStatus');
+        if (statusEl) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            statusEl.className = 'storage-status saved';
+            statusEl.innerHTML = `<span>💾 Datos guardados</span><span class="auto-save-indicator">${timeStr}</span>`;
+        }
+    },
+
+    saveDraft() { 
+        this.markUnsaved();
+    },
+
+    toggleViewer() {
+        const v = document.getElementById('imgViewer');
+        const b = document.getElementById('toggleBtn');
+        v.classList.toggle('collapsed'); 
+        b.classList.toggle('up');
+    },
+
+    setupImageEvents() {
+        const v = document.getElementById('imgViewer');
+        const img = document.getElementById('viewImg');
+        
+        const getPos = (e) => ({
+            x: e.touches ? e.touches[0].clientX : e.clientX,
+            y: e.touches ? e.touches[0].clientY : e.clientY
+        });
+
+        const startDrag = (e) => {
+            if(!img.src) return;
+            this.isDragging = true;
+            const pos = getPos(e);
+            this.startPos = { x: pos.x - this.imgPos.x, y: pos.y - this.imgPos.y };
+            img.style.transition = 'none';
+        };
+
+        const move = (e) => {
+            if (!this.isDragging) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            this.imgPos.x = pos.x - this.startPos.x;
+            this.imgPos.y = pos.y - this.startPos.y;
+            img.style.transform = `translate(${this.imgPos.x}px, ${this.imgPos.y}px) scale(${this.imgPos.scale})`;
+        };
+
+        const endDrag = () => {
+            this.isDragging = false;
+            img.style.transition = 'transform 0.1s';
+        };
+
+        v.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', endDrag);
+        v.addEventListener('touchstart', startDrag, {passive: false});
+        v.addEventListener('touchmove', move, {passive: false});
+        v.addEventListener('touchend', endDrag);
+    },
+
+    renderMatches() {
+        let h = '';
+        this.matches.forEach((m, i) => {
+            h += `<div class="card">
+                <div class="match-row">
+                    <div class="match-num">${i+1}</div>
+                    <input class="t-input" placeholder="LOCAL" value="${m.l}" oninput="app.matches[${i}].l=this.value.toUpperCase(); app.markUnsaved();">
+                    <input class="t-input" placeholder="VISITA" value="${m.v}" oninput="app.matches[${i}].v=this.value.toUpperCase(); app.markUnsaved();">
+                </div>
+                <div class="btn-group">
+                    <div class="btn-opt ${m.sel.includes(0)?'active':''}" onclick="app.toggle(${i},0)">L</div>
+                    <div class="btn-opt ${m.sel.includes(1)?'active':''}" onclick="app.toggle(${i},1)">E</div>
+                    <div class="btn-opt ${m.sel.includes(2)?'active':''}" onclick="app.toggle(${i},2)">V</div>
+                </div>
+            </div>`;
+        });
+        document.getElementById('matchesList').innerHTML = h;
+        this.checkStatus();
+    },
+
+    toggle(idx, val) {
+        let s = this.matches[idx].sel;
+        let p = s.indexOf(val);
+        if(p > -1) s.splice(p, 1); 
+        else if(s.length < 3) s.push(val);
+        s.sort(); 
+        this.markUnsaved(); 
+        this.renderMatches();
+    },
+
+    checkStatus() {
+        let t=0, d=0, f=0;
+        this.matches.forEach(m => { 
+            if(m.sel.length==3) t++; 
+            else if(m.sel.length==2) d++; 
+            else if(m.sel.length==1) f++; 
+        });
+        document.getElementById('countT').innerText = t;
+        document.getElementById('countD').innerText = d;
+        document.getElementById('countF').innerText = f;
+        const mode = document.getElementById('redSel').value;
+        const v = (mode=="4T" && t==4 && f==10) || 
+                  (mode=="7D" && d==7 && f==7) || 
+                  (mode=="3T3D" && t==3 && d==3 && f==8) || 
+                  (mode=="2T6D" && t==2 && d==6 && f==6);
+        document.getElementById('genBtn').disabled = !v;
+    },
+
+    generate() {
+        const mode = document.getElementById('redSel').value;
+        const matrix = this.matrices[mode];
+        this.tickets = [];
+        let idxR = [], idxF = [];
+        this.matches.forEach((m, i) => { 
+            if(m.sel.length > 1) idxR.push(i); 
+            else idxF.push(i); 
+        });
+        matrix.forEach(row => {
+            let t = new Array(14);
+            idxF.forEach(i => t[i] = this.matches[i].sel[0]);
+            idxR.forEach((i, col) => t[i] = this.matches[i].sel[row[col]]);
+            this.tickets.push(t);
+        });
+        
+        this.saveAllData();
+        
+        if (navigator.vibrate) navigator.vibrate(50);
+        this.setTab(3);
+    },
+
+    loadData() {
+        this.loadAllData();
+        this.renderMatches();
+        this.calculate();
+        this.updateStorageStatus();
+        alert("¡Datos recuperados correctamente!");
+    },
+
+    clearAllData() {
+        if(!confirm("⚠️ ¿ESTÁS SEGURO?\n\nSe borrarán TODOS los datos:\n- Partidos ingresados\n- Resultados reales\n- Boletos generados\n- Imagen cargada\n\nEsta acción no se puede deshacer.")) {
+            return;
+        }
+
+        // Limpiar variables
+        this.matches = Array.from({length: 14}, () => ({l:'', v:'', sel:[]}));
+        this.realResults = new Array(14).fill(null);
+        this.tickets = [];
+        
+        // Limpiar localStorage
+        localStorage.removeItem('progol_complete_data');
+        localStorage.removeItem('progol_image');
+        localStorage.removeItem('progol_draft');
+        localStorage.removeItem('progol_v13_final');
+        
+        // Limpiar imagen
+        this.removeImg();
+        
+        // Resetear selección
+        document.getElementById('redSel').value = '4T';
+        
+        // Renderizar
+        this.renderMatches();
+        this.updateStorageStatus();
+        
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        alert("✅ Todos los datos han sido limpiados");
+    },
+
+    setReal(i, val) {
+        this.realResults[i] = (this.realResults[i] === val) ? null : val;
+        this.renderFollow(); 
+        this.calculate();
+        this.markUnsaved();
+    },
+
+    calculate() {
+        let max = 0, vivos = 0;
+        this.tickets.forEach(t => {
+            let p = 0, v = true;
+            t.forEach((s, i) => { 
+                if(this.realResults[i] !== null) { 
+                    if(s === this.realResults[i]) p++; 
+                    else v = false; 
+                } 
+            });
+            if(p > max) max = p; 
+            if(v) vivos++;
+        });
+        document.getElementById('stats').innerHTML = `${max} Pts<br>${vivos} Vivos`;
+        return max;
+    },
+
+    renderFollow() {
+        document.getElementById('followList').innerHTML = this.matches.map((m, i) => `
+            <div class="card">
+                <div style="text-align:center; font-size:16px; margin-bottom:12px; font-weight:bold; text-transform:uppercase; color: var(--gold);">
+                    ${i+1}. ${m.l||'LOCAL'} vs ${m.v||'VISITA'}
+                </div>
+                <div class="btn-group">
+                    <div class="btn-opt ${this.realResults[i]===0?'hit':''}" onclick="app.setReal(${i},0)">L</div>
+                    <div class="btn-opt ${this.realResults[i]===1?'hit':''}" onclick="app.setReal(${i},1)">E</div>
+                    <div class="btn-opt ${this.realResults[i]===2?'hit':''}" onclick="app.setReal(${i},2)">V</div>
+                </div>
+            </div>`).join('');
+    },
+
+    renderTickets() {
+        const maxPts = this.calculate();
+        const counts = { 14:0, 13:0, 12:0, 11:0, 10:0 };
+        
+        let ticketsHTML = `<button class="btn-main" style="background:#1d4ed8; margin-bottom:15px;" onclick="app.exportExcel()">📊 EXPORTAR A EXCEL</button>`;
+        
+        const listHTML = this.tickets.map((t, i) => {
+            let pts = t.reduce((a, v, idx) => a + (this.realResults[idx] === v ? 1 : 0), 0);
+            if(pts >= 10) counts[pts]++;
+            
+            const isBest = pts === maxPts && maxPts > 0;
+            return `
+            <div class="ticket-card ${isBest?'best':''}">
+                ${isBest?'<div class="best-tag">⭐ LÍDER</div>':''}
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#94a3b8; margin-bottom: 5px;">
+                    <span>BOLETO #${i+1}</span> 
+                    <b style="color: ${isBest ? 'var(--gold)' : 'white'};">${pts} PUNTOS</b>
+                </div>
+                <div class="res-grid-h">
+                    ${t.map((v, idx) => `<div class="res-cell-h ${this.realResults[idx]===v?'win':''}">${['L','E','V'][v]}</div>`).join('')}
+                </div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('summaryContainer').innerHTML = `
+            <div class="summary-card">
+                <div style="text-align:center; font-size:14px; margin-bottom:12px; font-weight:bold; color:var(--p); text-transform: uppercase; letter-spacing: 1px;">Resumen de Premios</div>
+                <div class="summary-grid">
+                    <div class="summary-item"><span class="summary-pts">14 Pts</span><span class="summary-count">${counts[14]}</span></div>
+                    <div class="summary-item"><span class="summary-pts">13 Pts</span><span class="summary-count">${counts[13]}</span></div>
+                    <div class="summary-item"><span class="summary-pts">12 Pts</span><span class="summary-count">${counts[12]}</span></div>
+                    <div class="summary-item"><span class="summary-pts">11 Pts</span><span class="summary-count">${counts[11]}</span></div>
+                    <div class="summary-item"><span class="summary-pts">10 Pts</span><span class="summary-count">${counts[10]}</span></div>
+                </div>
+            </div>`;
+            
+        document.getElementById('ticketContainer').innerHTML = ticketsHTML + listHTML;
+    },
+
+    setTab(n) {
+        [1,2,3].forEach(i => document.getElementById('tab'+i).classList.toggle('hidden', i!==n));
+        document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i===n-1));
+        if(n==2) this.renderFollow(); 
+        if(n==3) this.renderTickets();
+        document.getElementById('mainScroll').scrollTop = 0;
+        if (navigator.vibrate) navigator.vibrate(20);
+    },
+
+    exportExcel() {
+        let csv = "Boleto,1,2,3,4,5,6,7,8,9,10,11,12,13,14\n";
+        this.tickets.forEach((t, i) => csv += `B-${i+1},${t.map(v => ['L','E','V'][v]).join(',')}\n`);
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); 
+        a.href = url;
+        a.download = `Progol_Boletos_${new Date().toISOString().split('T')[0]}.csv`; 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
+    removeImg() { 
+        document.getElementById('viewImg').src = ""; 
+        document.getElementById('btnDel').style.display='none'; 
+        document.getElementById('placeholder').style.display='block';
+        this.imgPos = { x: 0, y: 0, scale: 1 };
+        localStorage.removeItem('progol_image');
+        this.markUnsaved();
+    },
+    
+    reset() { 
+        if(confirm("¿Estás seguro de borrar todos los datos?")) { 
+            this.clearAllData();
+        } 
+    }
+};
+
+// Manejo de imagen mejorado
+function handleImageLoad(file) {
+    if (!file) return;
+    
+    const r = new FileReader();
+    r.onload = (ev) => { 
+        const img = document.getElementById('viewImg');
+        img.src = ev.target.result; 
+        img.onload = () => {
+            img.style.transform = 'translate(0,0) scale(1)';
+            app.imgPos = { x: 0, y: 0, scale: 1 };
+        };
+        document.getElementById('placeholder').style.display = 'none'; 
+        document.getElementById('btnDel').style.display = 'block';
+        
+        // Guardar imagen en localStorage
+        localStorage.setItem('progol_image', ev.target.result);
+        app.markUnsaved();
+    };
+    r.readAsDataURL(file);
+}
+
+document.getElementById('fileIn').onchange = (e) => {
+    handleImageLoad(e.target.files[0]);
+};
+
+document.getElementById('fileInImport').onchange = (e) => {
+    handleImageLoad(e.target.files[0]);
+};
+
+// Inicializar app
+app.init();
+</script>
+</body>
+</html>
